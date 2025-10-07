@@ -1,0 +1,242 @@
+Student Engagement Monitor
+A modern web application that analyzes student engagement through facial expressions and emotion detection using computer vision, deep learning, and real-time video streaming.
+
+🎯 Features
+Core Functionality
+Live Video Streaming: Real-time webcam feed in modern React interface
+Multi-Student Tracking: Automatically detects and tracks multiple students simultaneously
+Emotion Recognition: Advanced facial expression analysis (7 emotions)
+Engagement Scoring: Real-time engagement calculation and visualization
+Interactive Dashboard: Modern UI with charts, metrics, and live statistics
+Teacher Alerts: Smart notification system when engagement drops below threshold
+Session Analytics: Comprehensive statistics and historical tracking
+Alert System
+Automatic alerts when class engagement falls below 40% threshold
+Visual indicators with color-coded engagement levels
+Non-intrusive toast notifications for teachers
+Configurable cooldown to prevent alert fatigue
+Dashboard Elements
+Live engagement percentage with dynamic color coding (Red/Yellow/Green)
+Real-time student count display
+Session timer with automatic tracking
+Interactive engagement trend chart
+Individual student emotion display
+Face detection visualization overlay
+🏗️ Architecture
+Tech Stack
+Backend:
+
+FastAPI (Python) - High-performance async API
+WebSocket - Real-time bidirectional communication
+OpenCV - Computer vision and face detection
+DeepFace - Deep learning emotion recognition
+TensorFlow/Keras - Neural network backend
+Frontend:
+
+React 18 - Modern UI framework
+Vite - Fast build tool and dev server
+Tailwind CSS - Utility-first styling
+Recharts - Data visualization
+WebSocket API - Real-time updates
+Application Flow
+Browser captures webcam feed via WebRTC
+Frontend sends video frames to backend API
+Backend analyzes faces and emotions
+Results streamed back via WebSocket
+Dashboard updates in real-time
+🚀 Quick Start
+In Replit
+The application is pre-configured and ready to run! Simply:
+
+Click the "Run" button
+Allow camera access when prompted
+The dashboard will open automatically
+Running Outside Replit
+See SETUP.md for detailed installation and deployment instructions.
+
+Quick commands:
+
+# Install dependencies
+pip install -r requirements.txt
+cd frontend && npm install
+# Run backend (Terminal 1)
+uvicorn app:app --host 0.0.0.0 --port 8000
+# Run frontend (Terminal 2)
+cd frontend && npm run dev
+# Open http://localhost:5000
+📊 How It Works
+Engagement Calculation
+The system maps detected emotions to engagement scores:
+
+Emotion	Engagement Score	Interpretation
+Happy	90%	Highly engaged, enjoying content
+Surprise	70%	Engaged, interested in material
+Neutral	60%	Moderate engagement
+Sad	30%	Low engagement, may need help
+Fear	25%	Confused or struggling
+Angry	20%	Frustrated or disengaged
+Disgust	15%	Very low engagement
+Alert Thresholds
+🟢 70%+: Excellent engagement - Students are actively participating
+🟡 40-70%: Moderate - Consider varying your teaching approach
+🔴 Below 40%: Low Engagement - ALERT: Change tone or method!
+Technical Implementation
+Face Detection: Haar Cascade classifier for real-time detection
+Emotion Analysis: DeepFace with pre-trained neural networks
+Frame Processing: Client-side capture, server-side analysis
+Real-time Updates: WebSocket streaming for instant feedback
+Performance: Optimized for multi-student tracking
+🎮 Usage Guide
+Starting a Session
+Open the application in your browser
+Click "Allow" when prompted for camera access
+Position camera to capture students' faces
+Dashboard begins tracking automatically
+During the Session
+Monitor the engagement percentage (top card)
+Watch the real-time trend chart for patterns
+Receive alerts when engagement drops
+Check individual student emotions
+View live student count
+After the Session
+Review session statistics (duration, average engagement)
+Analyze engagement trends from the chart
+Use insights to improve future lessons
+Camera Tips
+Ensure good lighting (face students toward light source)
+Position camera 3-6 feet from students
+Keep students' faces clearly visible
+Avoid backlighting or harsh shadows
+📁 Project Structure
+.
+├── app.py                          # FastAPI backend server
+├── student_engagement_monitor.py   # Original desktop version (legacy)
+├── demo_with_image.py             # Image analysis demo
+├── requirements.txt               # Python dependencies
+├── SETUP.md                       # Detailed setup guide
+├── README.md                      # This file
+├── frontend/
+│   ├── src/
+│   │   ├── App.jsx               # Main React application
+│   │   ├── components/
+│   │   │   ├── VideoFeed.jsx    # Webcam capture & display
+│   │   │   ├── Dashboard.jsx    # Metrics and statistics
+│   │   │   ├── EngagementChart.jsx  # Trend visualization
+│   │   │   └── AlertToast.jsx   # Notification system
+│   │   ├── index.css            # Global styles
+│   │   └── main.jsx             # React entry point
+│   ├── package.json             # Node dependencies
+│   ├── vite.config.js          # Vite configuration
+│   ├── tailwind.config.js      # Tailwind CSS config
+│   └── index.html              # HTML entry point
+└── pyproject.toml              # Python project config
+🔧 Configuration
+Backend Settings
+Edit app.py to customize:
+
+Alert threshold (default: 40%)
+Alert cooldown (default: 10 seconds)
+Analysis intervals
+Emotion-to-engagement mappings
+Frontend Settings
+Edit frontend/src/App.jsx to adjust:
+
+Analysis interval (default: 1000ms)
+Chart update frequency
+UI theme and colors
+Video resolution
+Environment Variables
+Create frontend/.env for production:
+
+VITE_API_URL=http://your-backend-url.com
+VITE_WS_URL=your-backend-url.com
+⚠️ Important Considerations
+Privacy & Ethics
+Student Consent: Always obtain informed consent before monitoring
+Data Privacy: Video is processed locally, not stored or uploaded
+Transparency: Inform students about the monitoring system
+Compliance: Ensure adherence to FERPA, GDPR, or local regulations
+Accuracy Limitations
+Engagement detection accuracy depends on:
+
+Lighting conditions and camera quality
+Face angle and visibility
+Cultural differences in expressions
+Individual facial characteristics
+Use as supplementary tool, not sole metric for student assessment
+
+Performance Considerations
+Deep learning models are CPU/GPU intensive
+More students = higher processing load
+Recommended: Max 20 students per camera
+Adjust analysis interval if experiencing lag
+Browser Requirements
+Chrome 90+ (Recommended)
+Firefox 88+
+Edge 90+
+Safari 14+
+WebRTC and WebSocket support required
+🐛 Troubleshooting
+Camera Not Working
+✅ Grant camera permissions in browser
+✅ Check if camera is used by another application
+✅ Use HTTPS (required for camera access, except localhost)
+✅ Try different browser
+No Faces Detected
+✅ Improve lighting (avoid backlighting)
+✅ Position camera closer (3-6 feet optimal)
+✅ Ensure faces are front-facing
+✅ Check camera focus and clarity
+Connection Issues
+✅ Verify backend server is running (port 8000)
+✅ Check frontend server is running (port 5000)
+✅ Ensure ports are not blocked by firewall
+✅ Review browser console for errors (F12)
+Slow Performance
+✅ Reduce number of students in frame
+✅ Increase analysis interval in App.jsx
+✅ Close unnecessary browser tabs
+✅ Check CPU/memory usage
+Model Loading Errors
+✅ First run downloads ~100MB of models (requires internet)
+✅ Ensure sufficient disk space (500MB+)
+✅ Check Python dependencies are installed correctly
+🚢 Deployment
+Development
+# Both servers run locally
+uvicorn app:app --reload --port 8000  # Backend
+npm run dev                            # Frontend (port 5000)
+Production
+# Backend with Gunicorn
+gunicorn app:app -w 4 -k uvicorn.workers.UvicornWorker
+# Frontend build
+npm run build
+serve -s dist -l 5000
+See SETUP.md for comprehensive deployment instructions including:
+
+Production server configuration
+Reverse proxy setup with Nginx
+SSL/TLS certificate setup
+Environment variable configuration
+📈 Future Enhancements
+ Gaze/attention tracking for deeper analysis
+ Audio tone analysis for comprehensive engagement
+ Session recording and playback
+ Exportable reports (PDF/CSV/JSON)
+ Custom alert threshold configuration UI
+ Historical trend comparison
+ LMS integration (Canvas, Blackboard, Moodle)
+ Multi-camera support for large classrooms
+ Mobile app for remote monitoring
+ AI-powered teaching suggestions
+📄 License
+This project is for educational purposes. Ensure compliance with privacy regulations and obtain necessary permissions before deployment in production environments.
+
+🤝 Support
+For issues, questions, or contributions:
+
+Check this README and SETUP.md
+Review browser console (F12) for frontend errors
+Check backend logs for API issues
+Ensure all dependencies are correctly installed
+Built with ❤️ for educators to create more engaging learning experiences
