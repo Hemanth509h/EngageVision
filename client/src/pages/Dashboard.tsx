@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import DashboardHeader from "@/components/DashboardHeader";
 import VideoFeed from "@/components/VideoFeed";
 import EngagementMetric from "@/components/EngagementMetric";
@@ -16,6 +16,7 @@ export default function Dashboard() {
   const [chartData, setChartData] = useState<{ time: string; engagement: number }[]>([]);
   const [students, setStudents] = useState<{ id: string; emotion: string; confidence: number }[]>([]);
   const [sessionStart, setSessionStart] = useState<number | null>(null);
+  const wsRef = useRef<WebSocket | null>(null);
 
   const getEngagementLevel = (pct: number): "high" | "moderate" | "low" => {
     if (pct >= 70) return "high";
@@ -35,37 +36,69 @@ export default function Dashboard() {
   };
 
   const handleFrame = useCallback((imageData: string) => {
-    if (!isSessionActive) return;
+    if (!isSessionActive || !wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
     
-    console.log("Processing frame:", imageData.substring(0, 50));
-    
-    // TODO: Remove mock functionality - replace with actual API call
-    // This simulates the emotion detection API response
-    const mockEngagement = Math.floor(Math.random() * 60) + 30;
-    const mockStudentCount = Math.floor(Math.random() * 5) + 1;
-    const emotions = ["Happy", "Neutral", "Surprise", "Sad"];
-    
-    setEngagement(mockEngagement);
-    setStudentCount(mockStudentCount);
-    
-    const mockStudents = Array.from({ length: mockStudentCount }, (_, i) => ({
-      id: `student-${i}`,
-      emotion: emotions[Math.floor(Math.random() * emotions.length)],
-      confidence: Math.floor(Math.random() * 30) + 70,
+    // Send frame to Python backend for analysis
+    wsRef.current.send(JSON.stringify({
+      type: "frame",
+      data: imageData
     }));
-    setStudents(mockStudents);
+  }, [isSessionActive]);
 
-    const now = new Date();
-    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    
-    setChartData(prev => {
-      const updated = [...prev, { time: timeStr, engagement: mockEngagement }];
-      return updated.slice(-20);
-    });
-
-    if (mockEngagement < 40 && !showAlert) {
-      setShowAlert(true);
+  // WebSocket connection
+  useEffect(() => {
+    if (!isSessionActive) {
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+      return;
     }
+
+    // Connect to Python backend WebSocket
+    const wsUrl = import.meta.env.VITE_WS_URL || "ws://localhost:8000/ws";
+    wsRef.current = new WebSocket(wsUrl);
+
+    wsRef.current.onopen = () => {
+      console.log("Connected to Python backend");
+    };
+
+    wsRef.current.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      
+      if (message.type === "analysis") {
+        const data = message.data;
+        setEngagement(data.avg_engagement);
+        setStudentCount(data.student_count);
+        setStudents(data.students);
+
+        const now = new Date();
+        const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        
+        setChartData(prev => {
+          const updated = [...prev, { time: timeStr, engagement: data.avg_engagement }];
+          return updated.slice(-20);
+        });
+
+        if (data.avg_engagement < 40 && !showAlert) {
+          setShowAlert(true);
+        }
+      }
+    };
+
+    wsRef.current.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    wsRef.current.onclose = () => {
+      console.log("Disconnected from Python backend");
+    };
+
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+    };
   }, [isSessionActive, showAlert]);
 
   useEffect(() => {
